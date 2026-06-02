@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>张晨阳的学习空间 📚</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366f1',
+            primaryDark: '#4f46e5',
+            primaryLight: '#e0e7ff',
+            accent: '#f59e0b'
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .card-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .card-hover:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.1), 0 10px 10px -5px rgba(99, 102, 241, 0.04);
+      }
+      .gradient-bg {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      }
+      .text-gradient {
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        background-image: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- 密码登录页面 -->
+  <div id="loginPage" class="min-h-screen flex items-center justify-center gradient-bg">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 text-center">
+      <div class="mb-8">
+        <i class="fa-solid fa-graduation-cap text-6xl text-primary mb-4"></i>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">张晨阳的学习空间</h1>
+        <p class="text-gray-600">跨境电商 | 公考 | 四六级 | 怀旧天龙</p>
+      </div>
+      
+      <p class="text-gray-500 mb-6">请输入访问密码查看资料</p>
+      
+      <div class="mb-4">
+        <input id="passwordInput" type="password" placeholder="请输入密码" 
+               class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-lg">
+      </div>
+      
+      <button id="loginBtn" class="w-full bg-primary hover:bg-primaryDark text-white py-3 px-6 rounded-lg transition text-lg font-medium">
+        进入学习空间
+      </button>
+      
+      <p id="errorMsg" class="text-red-500 mt-4 hidden">密码错误，请重试</p>
+    </div>
+  </div>
+
+  <!-- 主内容页面（登录后显示） -->
+  <div id="mainContent" class="hidden">
+    <!-- 顶部欢迎横幅 -->
+    <div class="gradient-bg text-white py-12 px-4">
+      <div class="container mx-auto text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">
+          欢迎来到张晨阳的学习空间
+        </h1>
+        <p class="text-xl opacity-90 max-w-2xl mx-auto">
+          跨境电商运营 | 公务员考试 | 四六级备考 | 怀旧天龙攻略
+        </p>
+        <div class="mt-8 flex justify-center gap-4 flex-wrap">
+          <div class="bg-white/20 backdrop-blur-sm rounded-lg px-6 py-3">
+            <span class="text-2xl font-bold" id="totalCount">0</span>
+            <span class="ml-2">份学习资料</span>
+          </div>
+          <div class="bg-white/20 backdrop-blur-sm rounded-lg px-6 py-3">
+            <span class="text-2xl font-bold" id="categoryCount">0</span>
+            <span class="ml-2">个专区</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 导航与搜索栏 -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+      <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+        <h2 class="text-xl font-bold text-gradient flex items-center gap-2">
+          <i class="fa-solid fa-graduation-cap"></i> 资料大全
+        </h2>
+        
+        <!-- 搜索框 -->
+        <div class="w-full max-w-md mx-4">
+          <div class="relative">
+            <input id="searchInput" type="text" placeholder="搜索资料名称、描述..." 
+                   class="w-full px-4 py-2 pl-10 rounded-lg border border-gray-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
+            <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 分类标签 -->
+    <div class="container mx-auto px-4 py-6">
+      <div id="categoryTabs" class="flex flex-wrap gap-2 mb-8">
+        <button class="category-btn active bg-primary text-white px-4 py-2 rounded-full transition shadow-md" data-category="all">
+          全部资料
+        </button>
+      </div>
+
+      <!-- 资料卡片网格 -->
+      <div id="materialsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <!-- 资料卡片自动生成 -->
+      </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 text-white py-8 mt-16">
+      <div class="container mx-auto px-4 text-center">
+        <p class="mb-2">© 2026 张晨阳的学习空间 | 持续更新，共同进步</p>
+        <p class="text-gray-400 text-sm">跨境电商 | 公考 | 四六级 | 怀旧天龙</p>
+      </div>
+    </footer>
+
+    <!-- 预览模态框 -->
+    <div id="previewModal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+        <div class="p-4 border-b flex items-center justify-between">
+          <h3 id="modalTitle" class="text-xl font-bold"></h3>
+          <button id="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl transition">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div id="modalContent" class="flex-1 overflow-auto p-4">
+          <!-- 预览内容自动加载 -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ====================== 设置你的访问密码 ======================
+  const ACCESS_PASSWORD = "123456"; // 把这里改成你自己的密码
+  // ===================================================================
+
+  // ====================== 在这里添加你的学习资料 ======================
+  const materials = [
+    // 跨境电商专区
+    {
+      name: "沃尔玛美国站运营全攻略",
+      type: "pdf",
+      category: "跨境电商",
+      url: "https://example.com/walmart-guide.pdf",
+      description: "从注册到出单完整流程，包含选品、上架、物流、广告全解析",
+      date: "2026-05-20"
+    },
+    {
+      name: "亚马逊FBA发货流程详解",
+      type: "video",
+      category: "跨境电商",
+      url: "https://www.bilibili.com/video/BV1xx411c7mZ",
+      description: "手把手教你创建FBA货件，打印标签，发货到亚马逊仓库",
+      date: "2026-05-18"
+    },
+
+    // 公考专区
+    {
+      name: "行测高频考点笔记",
+      type: "pdf",
+      category: "公考专区",
+      url: "https://example.com/xingce-notes.pdf",
+      description: "言语理解、判断推理、数量关系、资料分析核心考点",
+      date: "2026-05-25"
+    },
+    {
+      name: "申论大作文万能模板",
+      type: "word",
+      category: "公考专区",
+      url: "https://example.com/shenlun-template.docx",
+      description: "10套高分作文模板，包含开头、结尾、分论点写法",
+      date: "2026-05-22"
+    },
+
+    // 四六级专区
+    {
+      name: "四级高频词汇表",
+      type: "excel",
+      category: "四六级专区",
+      url: "https://example.com/cet4-vocab.xlsx",
+      description: "近10年四级真题高频词汇，按考频排序",
+      date: "2026-05-28"
+    },
+    {
+      name: "六级听力真题合集",
+      type: "other",
+      category: "四六级专区",
+      url: "https://example.com/cet6-listening.zip",
+      description: "2016-2026年六级听力真题+音频+原文",
+      date: "2026-05-25"
+    },
+
+    // 怀旧天龙专区
+    {
+      name: "怀旧天龙全门派攻略",
+      type: "pdf",
+      category: "怀旧天龙专区",
+      url: "https://example.com/tianlong-classes.pdf",
+      description: "九大门派加点、宝石、装备、技能全解析",
+      date: "2026-05-30"
+    },
+    {
+      name: "燕子坞副本通关教程",
+      type: "video",
+      category: "怀旧天龙专区",
+      url: "https://www.bilibili.com/video/BV1aa411z7mC",
+      description: "详细讲解燕子坞每个BOSS的打法和注意事项",
+      date: "2026-05-28"
+    }
+  ];
+  // ===================================================================
+
+  // 文件类型图标映射
+  const typeIcons = {
+    pdf: "fa-file-pdf text-red-500",
+    video: "fa-video text-blue-500",
+    word: "fa-file-word text-blue-700",
+    excel: "fa-file-excel text-green-600",
+    image: "fa-image text-purple-500",
+    code: "fa-code text-yellow-600",
+    other: "fa-file-zipper text-orange-500"
+  };
+
+  // DOM元素
+  const loginPage = document.getElementById('loginPage');
+  const mainContent = document.getElementById('mainContent');
+  const loginBtn = document.getElementById('loginBtn');
+  const passwordInput = document.getElementById('passwordInput');
+  const errorMsg = document.getElementById('errorMsg');
+  const materialsGrid = document.getElementById('materialsGrid');
+  const categoryTabs = document.getElementById('categoryTabs');
+  const searchInput = document.getElementById('searchInput');
+  const totalCount = document.getElementById('totalCount');
+  const categoryCount = document.getElementById('categoryCount');
+  const previewModal = document.getElementById('previewModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalContent = document.getElementById('modalContent');
+  const closeModal = document.getElementById('closeModal');
+
+  // ============== 密码登录逻辑 ==============
+  function checkLogin() {
+    const savedPassword = localStorage.getItem('studySpacePassword');
+    if (savedPassword === ACCESS_PASSWORD) {
+      showMainContent();
+    }
+  }
+
+  function showMainContent() {
+    loginPage.classList.add('hidden');
+    mainContent.classList.remove('hidden');
+    generateCategories();
+    renderMaterials();
+  }
+
+  loginBtn.addEventListener('click', () => {
+    const inputPassword = passwordInput.value.trim();
+    if (inputPassword === ACCESS_PASSWORD) {
+      localStorage.setItem('studySpacePassword', inputPassword);
+      errorMsg.classList.add('hidden');
+      showMainContent();
+    } else {
+      errorMsg.classList.remove('hidden');
+      passwordInput.value = '';
+    }
+  });
+
+  passwordInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      loginBtn.click();
+    }
+  });
+
+  // ============== 生成分类标签 ==============
+  function generateCategories() {
+    const categories = [...new Set(materials.map(m => m.category))];
+    categoryCount.textContent = categories.length;
+    
+    categories.forEach(category => {
+      const btn = document.createElement('button');
+      btn.className = "category-btn bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full transition";
+      btn.dataset.category = category;
+      btn.textContent = category;
+      categoryTabs.appendChild(btn);
+    });
+
+    // 分类切换事件
+    document.querySelectorAll('.category-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.category-btn').forEach(b => {
+          b.classList.remove('active', 'bg-primary', 'text-white', 'shadow-md');
+          b.classList.add('bg-gray-100');
+        });
+        btn.classList.add('active', 'bg-primary', 'text-white', 'shadow-md');
+        btn.classList.remove('bg-gray-100');
+        renderMaterials(btn.dataset.category);
+      });
+    });
+  }
+
+  // ============== 渲染资料卡片 ==============
+  function renderMaterials(category = 'all', searchTerm = '') {
+    materialsGrid.innerHTML = '';
+    
+    let filteredMaterials = materials;
+    
+    // 分类过滤
+    if (category !== 'all') {
+      filteredMaterials = filteredMaterials.filter(m => m.category === category);
+    }
+    
+    // 搜索过滤
+    if (searchTerm) {
+      filteredMaterials = filteredMaterials.filter(m => 
+        m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        m.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // 更新总数
+    totalCount.textContent = filteredMaterials.length;
+    
+    // 渲染卡片
+    filteredMaterials.forEach(material => {
+      const card = document.createElement('div');
+      card.className = "bg-white rounded-xl shadow-md overflow-hidden card-hover";
+      card.innerHTML = `
+        <div class="p-6">
+          <div class="flex items-center mb-4">
+            <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mr-4">
+              <i class="fa-solid ${typeIcons[material.type]} text-2xl"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-lg mb-1 line-clamp-2">${material.name}</h3>
+              <p class="text-sm text-gray-500">${material.date}</p>
+            </div>
+          </div>
+          <p class="text-gray-600 text-sm mb-4 line-clamp-3">${material.description}</p>
+          <div class="flex gap-2">
+            <button class="preview-btn flex-1 bg-primary hover:bg-primaryDark text-white px-3 py-2 rounded-lg transition" 
+                    data-url="${material.url}" data-type="${material.type}" data-name="${material.name}">
+              <i class="fa-solid fa-eye mr-1"></i> 在线预览
+            </button>
+            <a href="${material.url}" target="_blank" 
+               class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition text-center">
+              <i class="fa-solid fa-download mr-1"></i> 下载
+            </a>
+          </div>
+        </div>
+      `;
+      materialsGrid.appendChild(card);
+    });
+
+    // 预览按钮事件
+    document.querySelectorAll('.preview-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        openPreview(
+          btn.dataset.url,
+          btn.dataset.type,
+          btn.dataset.name
+        );
+      });
+    });
+  }
+
+  // ============== 在线预览功能 ==============
+  function openPreview(url, type, name) {
+    modalTitle.textContent = name;
+    modalContent.innerHTML = '';
+
+    switch(type) {
+      case 'pdf':
+        modalContent.innerHTML = `
+          <iframe src="https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true" 
+                  width="100%" height="700px" frameborder="0"></iframe>
+        `;
+        break;
+      
+      case 'video':
+        if (url.includes('bilibili.com')) {
+          const bvid = url.match(/BV([a-zA-Z0-9]+)/)[0];
+          modalContent.innerHTML = `
+            <iframe src="//player.bilibili.com/player.html?bvid=${bvid}&page=1&autoplay=0" 
+                    width="100%" height="600px" scrolling="no" border="0" frameborder="no" 
+                    framespacing="0" allowfullscreen="true"></iframe>
+          `;
+        } else {
+          modalContent.innerHTML = `
+            <video src="${url}" controls width="100%" height="auto" class="rounded-lg">
+              您的浏览器不支持视频播放
+            </video>
+          `;
+        }
+        break;
+      
+      case 'word':
+      case 'excel':
+        modalContent.innerHTML = `
+          <iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}" 
+                  width="100%" height="700px" frameborder="0"></iframe>
+        `;
+        break;
+      
+      case 'image':
+        modalContent.innerHTML = `
+          <img src="${url}" alt="${name}" class="max-w-full h-auto mx-auto rounded-lg shadow-lg">
+        `;
+        break;
+      
+      default:
+        modalContent.innerHTML = `
+          <div class="text-center py-20">
+            <i class="fa-solid fa-file-zipper text-6xl text-orange-500 mb-4"></i>
+            <p class="text-gray-600 mb-4">压缩包不支持在线预览，请下载后解压查看</p>
+            <a href="${url}" target="_blank" 
+               class="bg-primary hover:bg-primaryDark text-white px-6 py-3 rounded-lg transition">
+              点击下载
+            </a>
+          </div>
+        `;
+    }
+
+    previewModal.classList.remove('hidden');
+  }
+
+  // 关闭模态框
+  closeModal.addEventListener('click', () => {
+    previewModal.classList.add('hidden');
+    modalContent.innerHTML = '';
+  });
+
+  previewModal.addEventListener('click', (e) => {
+    if (e.target === previewModal) {
+      previewModal.classList.add('hidden');
+      modalContent.innerHTML = '';
+    }
+  });
+
+  // ============== 搜索功能 ==============
+  searchInput.addEventListener('input', (e) => {
+    const activeCategory = document.querySelector('.category-btn.active').dataset.category;
+    renderMaterials(activeCategory, e.target.value);
+  });
+
+  // ============== 初始化 ==============
+  window.onload = checkLogin;
+</script>
+</body>
+</html>
