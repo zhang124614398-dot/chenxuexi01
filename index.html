@@ -111,6 +111,11 @@
             <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
           </div>
         </div>
+        
+        <!-- 上传按钮 -->
+        <button id="openUploadBtn" class="bg-primary hover:bg-primaryDark text-white px-4 py-2 rounded-lg transition flex items-center gap-2">
+          <i class="fa-solid fa-upload"></i> 上传资料
+        </button>
       </div>
     </header>
 
@@ -150,87 +155,62 @@
         </div>
       </div>
     </div>
+
+    <!-- 上传模态框 -->
+    <div id="uploadModal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl w-full max-w-lg overflow-hidden flex flex-col shadow-2xl">
+        <div class="p-4 border-b flex items-center justify-between">
+          <h3 class="text-xl font-bold">上传学习资料</h3>
+          <button id="closeUploadModal" class="text-gray-500 hover:text-gray-700 text-2xl transition">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div id="uploadContent" class="flex-1 overflow-auto p-4">
+          <form id="uploadForm" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">上传密码</label>
+              <input id="uploadPassword" type="password" placeholder="请输入上传密码" 
+                     class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">资料分类</label>
+              <select id="uploadCategory" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
+                <option value="跨境电商">跨境电商</option>
+                <option value="公考专区">公考专区</option>
+                <option value="四六级专区">四六级专区</option>
+                <option value="怀旧天龙专区">怀旧天龙专区</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">资料名称</label>
+              <input id="uploadName" type="text" placeholder="请输入资料名称" 
+                     class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">资料描述</label>
+              <textarea id="uploadDesc" rows="2" placeholder="请输入资料描述" 
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">选择文件（仅支持图片和视频）</label>
+              <input id="uploadFile" type="file" accept="image/*,video/*" 
+                     class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" required>
+              <p class="text-xs text-gray-500 mt-1">支持JPG、PNG、GIF、MP4等格式，单个文件不超过50MB</p>
+            </div>
+            <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white py-3 px-6 rounded-lg transition text-lg font-medium">
+              上传资料
+            </button>
+            <p id="uploadError" class="text-red-500 text-sm hidden"></p>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 
 <script>
-  // ====================== 设置你的访问密码 ======================
-  const ACCESS_PASSWORD = "123456"; // 把这里改成你自己的密码
-  // ===================================================================
-
-  // ====================== 在这里添加你的学习资料 ======================
-  const materials = [
-    // 跨境电商专区
-    {
-      name: "沃尔玛美国站运营全攻略",
-      type: "pdf",
-      category: "跨境电商",
-      url: "https://example.com/walmart-guide.pdf",
-      description: "从注册到出单完整流程，包含选品、上架、物流、广告全解析",
-      date: "2026-05-20"
-    },
-    {
-      name: "亚马逊FBA发货流程详解",
-      type: "video",
-      category: "跨境电商",
-      url: "https://www.bilibili.com/video/BV1xx411c7mZ",
-      description: "手把手教你创建FBA货件，打印标签，发货到亚马逊仓库",
-      date: "2026-05-18"
-    },
-
-    // 公考专区
-    {
-      name: "行测高频考点笔记",
-      type: "pdf",
-      category: "公考专区",
-      url: "https://example.com/xingce-notes.pdf",
-      description: "言语理解、判断推理、数量关系、资料分析核心考点",
-      date: "2026-05-25"
-    },
-    {
-      name: "申论大作文万能模板",
-      type: "word",
-      category: "公考专区",
-      url: "https://example.com/shenlun-template.docx",
-      description: "10套高分作文模板，包含开头、结尾、分论点写法",
-      date: "2026-05-22"
-    },
-
-    // 四六级专区
-    {
-      name: "四级高频词汇表",
-      type: "excel",
-      category: "四六级专区",
-      url: "https://example.com/cet4-vocab.xlsx",
-      description: "近10年四级真题高频词汇，按考频排序",
-      date: "2026-05-28"
-    },
-    {
-      name: "六级听力真题合集",
-      type: "other",
-      category: "四六级专区",
-      url: "https://example.com/cet6-listening.zip",
-      description: "2016-2026年六级听力真题+音频+原文",
-      date: "2026-05-25"
-    },
-
-    // 怀旧天龙专区
-    {
-      name: "怀旧天龙全门派攻略",
-      type: "pdf",
-      category: "怀旧天龙专区",
-      url: "https://example.com/tianlong-classes.pdf",
-      description: "九大门派加点、宝石、装备、技能全解析",
-      date: "2026-05-30"
-    },
-    {
-      name: "燕子坞副本通关教程",
-      type: "video",
-      category: "怀旧天龙专区",
-      url: "https://www.bilibili.com/video/BV1aa411z7mC",
-      description: "详细讲解燕子坞每个BOSS的打法和注意事项",
-      date: "2026-05-28"
-    }
-  ];
+  // ====================== 密码设置 ======================
+  const ACCESS_PASSWORD = "123456"; // 访问密码（查看资料用）
+  const UPLOAD_PASSWORD = "upload123"; // 上传密码（仅管理员知道）
   // ===================================================================
 
   // 文件类型图标映射
@@ -259,6 +239,107 @@
   const modalTitle = document.getElementById('modalTitle');
   const modalContent = document.getElementById('modalContent');
   const closeModal = document.getElementById('closeModal');
+  const openUploadBtn = document.getElementById('openUploadBtn');
+  const uploadModal = document.getElementById('uploadModal');
+  const closeUploadModal = document.getElementById('closeUploadModal');
+  const uploadForm = document.getElementById('uploadForm');
+  const uploadError = document.getElementById('uploadError');
+
+  // ====================== 资料数据管理 ======================
+  // 从本地存储加载资料，合并默认资料
+  function loadMaterials() {
+    const savedMaterials = localStorage.getItem('studySpaceMaterials');
+    if (savedMaterials) {
+      return JSON.parse(savedMaterials);
+    } else {
+      // 默认初始资料
+      return [
+        // 跨境电商专区
+        {
+          name: "沃尔玛美国站运营全攻略",
+          type: "pdf",
+          category: "跨境电商",
+          url: "https://example.com/walmart-guide.pdf",
+          description: "从注册到出单完整流程，包含选品、上架、物流、广告全解析",
+          date: "2026-05-20",
+          isUploaded: false
+        },
+        {
+          name: "亚马逊FBA发货流程详解",
+          type: "video",
+          category: "跨境电商",
+          url: "https://www.bilibili.com/video/BV1xx411c7mZ",
+          description: "手把手教你创建FBA货件，打印标签，发货到亚马逊仓库",
+          date: "2026-05-18",
+          isUploaded: false
+        },
+        // 公考专区
+        {
+          name: "行测高频考点笔记",
+          type: "pdf",
+          category: "公考专区",
+          url: "https://example.com/xingce-notes.pdf",
+          description: "言语理解、判断推理、数量关系、资料分析核心考点",
+          date: "2026-05-25",
+          isUploaded: false
+        },
+        {
+          name: "申论大作文万能模板",
+          type: "word",
+          category: "公考专区",
+          url: "https://example.com/shenlun-template.docx",
+          description: "10套高分作文模板，包含开头、结尾、分论点写法",
+          date: "2026-05-22",
+          isUploaded: false
+        },
+        // 四六级专区
+        {
+          name: "四级高频词汇表",
+          type: "excel",
+          category: "四六级专区",
+          url: "https://example.com/cet4-vocab.xlsx",
+          description: "近10年四级真题高频词汇，按考频排序",
+          date: "2026-05-28",
+          isUploaded: false
+        },
+        {
+          name: "六级听力真题合集",
+          type: "other",
+          category: "四六级专区",
+          url: "https://example.com/cet6-listening.zip",
+          description: "2016-2026年六级听力真题+音频+原文",
+          date: "2026-05-25",
+          isUploaded: false
+        },
+        // 怀旧天龙专区
+        {
+          name: "怀旧天龙全门派攻略",
+          type: "pdf",
+          category: "怀旧天龙专区",
+          url: "https://example.com/tianlong-classes.pdf",
+          description: "九大门派加点、宝石、装备、技能全解析",
+          date: "2026-05-30",
+          isUploaded: false
+        },
+        {
+          name: "燕子坞副本通关教程",
+          type: "video",
+          category: "怀旧天龙专区",
+          url: "https://www.bilibili.com/video/BV1aa411z7mC",
+          description: "详细讲解燕子坞每个BOSS的打法和注意事项",
+          date: "2026-05-28",
+          isUploaded: false
+        }
+      ];
+    }
+  }
+
+  // 保存资料到本地存储
+  function saveMaterials() {
+    localStorage.setItem('studySpaceMaterials', JSON.stringify(materials));
+  }
+
+  let materials = loadMaterials();
 
   // ============== 密码登录逻辑 ==============
   function checkLogin() {
@@ -295,6 +376,13 @@
 
   // ============== 生成分类标签 ==============
   function generateCategories() {
+    // 清空现有分类（保留"全部资料"）
+    categoryTabs.innerHTML = `
+      <button class="category-btn active bg-primary text-white px-4 py-2 rounded-full transition shadow-md" data-category="all">
+        全部资料
+      </button>
+    `;
+    
     const categories = [...new Set(materials.map(m => m.category))];
     categoryCount.textContent = categories.length;
     
@@ -343,10 +431,34 @@
     totalCount.textContent = filteredMaterials.length;
     
     // 渲染卡片
-    filteredMaterials.forEach(material => {
+    filteredMaterials.forEach((material, index) => {
       const card = document.createElement('div');
       card.className = "bg-white rounded-xl shadow-md overflow-hidden card-hover";
+      
+      // 内容预览区域：图片/视频直接显示，其他类型显示图标
+      let previewHtml = '';
+      if (material.type === 'image') {
+        previewHtml = `
+          <div class="h-48 overflow-hidden">
+            <img src="${material.url}" alt="${material.name}" class="w-full h-full object-cover">
+          </div>
+        `;
+      } else if (material.type === 'video') {
+        previewHtml = `
+          <div class="h-48 overflow-hidden bg-black flex items-center justify-center">
+            <video src="${material.url}" class="w-full h-full object-contain" controls muted></video>
+          </div>
+        `;
+      } else {
+        previewHtml = `
+          <div class="h-48 bg-primary/5 flex items-center justify-center">
+            <i class="fa-solid ${typeIcons[material.type]} text-6xl"></i>
+          </div>
+        `;
+      }
+      
       card.innerHTML = `
+        ${previewHtml}
         <div class="p-6">
           <div class="flex items-center mb-4">
             <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mr-4">
@@ -363,10 +475,16 @@
                     data-url="${material.url}" data-type="${material.type}" data-name="${material.name}">
               <i class="fa-solid fa-eye mr-1"></i> 在线预览
             </button>
-            <a href="${material.url}" target="_blank" 
+            <a href="${material.url}" download="${material.name}" 
                class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition text-center">
               <i class="fa-solid fa-download mr-1"></i> 下载
             </a>
+            ${material.isUploaded ? `
+              <button class="delete-btn bg-red-100 hover:bg-red-200 text-red-600 px-3 py-2 rounded-lg transition" 
+                      data-index="${index}">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            ` : ''}
           </div>
         </div>
       `;
@@ -383,6 +501,19 @@
         );
       });
     });
+
+    // 删除按钮事件（仅用户上传的资料显示）
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (confirm('确定要删除这个资料吗？删除后无法恢复')) {
+          const index = parseInt(btn.dataset.index);
+          materials.splice(index, 1);
+          saveMaterials();
+          renderMaterials();
+          generateCategories();
+        }
+      });
+    });
   }
 
   // ============== 在线预览功能 ==============
@@ -391,10 +522,11 @@
     modalContent.innerHTML = '';
 
     switch(type) {
-      case 'pdf':
+      case 'image':
         modalContent.innerHTML = `
-          <iframe src="https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true" 
-                  width="100%" height="700px" frameborder="0"></iframe>
+          <div class="flex items-center justify-center h-full">
+            <img src="${url}" alt="${name}" class="max-w-full max-h-[70vh] rounded-lg shadow-lg">
+          </div>
         `;
         break;
       
@@ -408,11 +540,20 @@
           `;
         } else {
           modalContent.innerHTML = `
-            <video src="${url}" controls width="100%" height="auto" class="rounded-lg">
-              您的浏览器不支持视频播放
-            </video>
+            <div class="flex items-center justify-center h-full">
+              <video src="${url}" controls width="100%" height="auto" class="max-h-[70vh] rounded-lg">
+                您的浏览器不支持视频播放
+              </video>
+            </div>
           `;
         }
+        break;
+      
+      case 'pdf':
+        modalContent.innerHTML = `
+          <iframe src="https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true" 
+                  width="100%" height="700px" frameborder="0"></iframe>
+        `;
         break;
       
       case 'word':
@@ -423,18 +564,12 @@
         `;
         break;
       
-      case 'image':
-        modalContent.innerHTML = `
-          <img src="${url}" alt="${name}" class="max-w-full h-auto mx-auto rounded-lg shadow-lg">
-        `;
-        break;
-      
       default:
         modalContent.innerHTML = `
           <div class="text-center py-20">
             <i class="fa-solid fa-file-zipper text-6xl text-orange-500 mb-4"></i>
-            <p class="text-gray-600 mb-4">压缩包不支持在线预览，请下载后解压查看</p>
-            <a href="${url}" target="_blank" 
+            <p class="text-gray-600 mb-4">该类型文件不支持在线预览，请下载后查看</p>
+            <a href="${url}" download="${name}" 
                class="bg-primary hover:bg-primaryDark text-white px-6 py-3 rounded-lg transition">
               点击下载
             </a>
@@ -445,7 +580,7 @@
     previewModal.classList.remove('hidden');
   }
 
-  // 关闭模态框
+  // 关闭预览模态框
   closeModal.addEventListener('click', () => {
     previewModal.classList.add('hidden');
     modalContent.innerHTML = '';
@@ -458,13 +593,108 @@
     }
   });
 
+  // ============== 上传功能逻辑 ==============
+  // 打开上传模态框
+  openUploadBtn.addEventListener('click', () => {
+    uploadModal.classList.remove('hidden');
+    uploadError.classList.add('hidden');
+    uploadForm.reset();
+  });
+
+  // 关闭上传模态框
+  closeUploadModal.addEventListener('click', () => {
+    uploadModal.classList.add('hidden');
+    uploadError.classList.add('hidden');
+    uploadForm.reset();
+  });
+
+  uploadModal.addEventListener('click', (e) => {
+    if (e.target === uploadModal) {
+      uploadModal.classList.add('hidden');
+      uploadError.classList.add('hidden');
+      uploadForm.reset();
+    }
+  });
+
+  // 上传表单提交
+  uploadForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const password = document.getElementById('uploadPassword').value.trim();
+    const category = document.getElementById('uploadCategory').value;
+    const name = document.getElementById('uploadName').value.trim();
+    const description = document.getElementById('uploadDesc').value.trim();
+    const file = document.getElementById('uploadFile').files[0];
+    
+    // 验证上传密码
+    if (password !== UPLOAD_PASSWORD) {
+      uploadError.textContent = '上传密码错误，请联系管理员';
+      uploadError.classList.remove('hidden');
+      return;
+    }
+    
+    // 验证文件类型
+    const fileType = file.type;
+    let type;
+    if (fileType.startsWith('image/')) {
+      type = 'image';
+    } else if (fileType.startsWith('video/')) {
+      type = 'video';
+    } else {
+      uploadError.textContent = '仅支持上传图片和视频文件';
+      uploadError.classList.remove('hidden');
+      return;
+    }
+    
+    // 验证文件大小（50MB限制）
+    const maxSize = 50 * 1024 * 1024;
+    if (file.size > maxSize) {
+      uploadError.textContent = '文件大小不能超过50MB';
+      uploadError.classList.remove('hidden');
+      return;
+    }
+    
+    // 读取文件为Base64格式保存到本地
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const fileUrl = event.target.result;
+      
+      // 创建新资料对象
+      const newMaterial = {
+        name: name,
+        type: type,
+        category: category,
+        url: fileUrl,
+        description: description || '暂无描述',
+        date: new Date().toISOString().split('T')[0],
+        isUploaded: true
+      };
+      
+      // 添加到资料列表最前面
+      materials.unshift(newMaterial);
+      saveMaterials();
+      
+      // 关闭模态框并刷新页面
+      uploadModal.classList.add('hidden');
+      renderMaterials();
+      generateCategories();
+    };
+    
+    reader.onerror = () => {
+      uploadError.textContent = '文件读取失败，请重试';
+      uploadError.classList.remove('hidden');
+    };
+    
+    reader.readAsDataURL(file);
+  });
+
   // ============== 搜索功能 ==============
   searchInput.addEventListener('input', (e) => {
     const activeCategory = document.querySelector('.category-btn.active').dataset.category;
     renderMaterials(activeCategory, e.target.value);
   });
 
-  // ============== 初始化 ==============
+  // ============== 页面初始化 ==============
   window.onload = checkLogin;
 </script>
 </body>
